@@ -3,7 +3,11 @@ import sys
 import time
 import numpy as np
 
-from PIL import ImageGrab
+from PIL import ImageGrab, Image
+
+first_time_running = True
+window_rect = 0
+
 """
 Converts a given pixel in the form (R, G, B) to a single pixel representing
 its value in grayscale from 0-255 following the equation:
@@ -21,8 +25,7 @@ def rgb_to_grayscale(pixel):
 	return pixel[0] * 0.21 + pixel[1] * 0.572 + pixel[2] * 0.07
 
 """
-Performs a O(lw) scan over the given input rectangle to grab the pixels in
-grayscale of the screen.
+Grabs the pixels in grayscale of the screen or in color if needed.
 
 Inputs:
  - rect: A 4-tuple representing the coordinates that define the rectangle on the
@@ -31,16 +34,11 @@ Inputs:
 Returns an array representing the grayscale pixels of the screen given the
 rectangle of shape (l, w).
 """
-def get_window_pixels(rect):
-	count = 0
-	pixels = ImageGrab.grab().load()
-	x_range, y_range = rect[2] - rect[0], rect[3] - rect[1]
-	start_x, start_y = rect[0], rect[1]
-	export_pixels = [[0 for y in range(y_range)] for x in range(x_range)]
-	for y in range(rect[1], rect[3]):
-		for x in range(rect[0], rect[2]):
-			export_pixels[x-start_x][y-start_y] = rgb_to_grayscale(pixels[x,y])
-	return np.array(export_pixels)
+def get_window_pixels(rect, grayscale = True):
+	if not grayscale:
+		return ImageGrab.grab(bbox=tuple(rect))
+	else:
+		return ImageGrab.grab(bbox=tuple(rect)).convert("L")
 
 """
 Obtains the list of Windows hwnds given a string representing the title of the
@@ -81,7 +79,7 @@ def get_window_rect():
 	try:
 		win32gui.SetForegroundWindow(hwnd)
 	except:
-		print("Unexpected error, please restart Minesweeper and retry")
+		print("Unexpected error, please restart game and retry")
 		sys.exit()
 
 	rect = win32gui.GetWindowRect(hwnd)
@@ -94,3 +92,28 @@ def get_window_rect():
 		print("Unexpected error, please restart game retry")
 		sys.exit()
 	return rect
+
+"""
+Returns the current game frame in the form of an array of grayscale pixels.
+
+Inputs:
+ - debug: 
+"""
+def grab_frame(debug = False, grayscale = True, wetime=False):
+	global window_rect
+	if window_rect == 0:
+		window_rect = get_window_rect()
+	now = 0
+	if wetime:
+		now = time.time()		
+	pixels = get_window_pixels(window_rect, grayscale=True)
+
+	if debug:
+		if wetime:
+			now = time.time()
+		pixels.show()
+		if wetime:
+			print("Showing frame. Took time:", time.time()-now)
+	if wetime:
+		print("Grabbing frame. Took time:", time.time()-now)
+	return pixels
