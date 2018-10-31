@@ -1,5 +1,7 @@
 # cs682-final-project
-Final project for UMass Amherst's Compsci 682 class
+Final project for UMass Amherst's Compsci 682 class. Implementing a double DQN 
+with capsule layers to learn how to play the game Thumper
+(and more (hopefully)).
 
 ## Getting Started
 
