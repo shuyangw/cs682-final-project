@@ -106,8 +106,7 @@ def grab_frame(debug = False, grayscale = True, wetime=False):
 	now = 0
 	if wetime:
 		now = time.time()		
-	pixels = get_window_pixels(window_rect, grayscale=True)
-
+	pixels = get_window_pixels_mss(window_rect, grayscale=True).convert("L")
 	if debug:
 		if wetime:
 			now = time.time()
@@ -117,3 +116,15 @@ def grab_frame(debug = False, grayscale = True, wetime=False):
 	if wetime:
 		print("Grabbing frame. Took time:", time.time()-now)
 	return pixels
+
+def get_window_pixels_mss(rect, grayscale=True):
+	from mss import mss
+	with mss() as sct:
+		bound = { 	"top": rect[1],
+					"left": rect[0],
+					"width": rect[2] - rect[0],
+					"height": rect[3] - rect[1],
+					"mon": len(sct.monitors) - 1
+		}
+		sct_img = sct.grab(bound)
+		return Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX')
