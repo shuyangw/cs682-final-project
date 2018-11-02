@@ -41,6 +41,22 @@ def get_window_pixels(rect, grayscale = True):
 		return ImageGrab.grab(bbox=tuple(rect)).convert("L")
 
 """
+Does the same thing as get_window_pixels() but with a faster method. Extracts
+a pixel in about 0.03 of a second.
+"""
+def get_window_pixels_mss(rect):
+	from mss import mss
+	with mss() as sct:
+		bound = { 	"top": rect[1],
+					"left": rect[0],
+					"width": rect[2] - rect[0],
+					"height": rect[3] - rect[1],
+					"mon": len(sct.monitors) - 1
+		}
+		sct_img = sct.grab(bound)
+		return Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX')
+
+"""
 Obtains the list of Windows hwnds given a string representing the title of the
 desired process. We will return every process with the exact string if the 
 "exact" parameter is True. If not, we return every process with that string in
@@ -97,16 +113,24 @@ def get_window_rect():
 Returns the current game frame in the form of an array of grayscale pixels.
 
 Inputs:
- - debug: 
+ - grayscale: A boolean representing whether or not we want our frame to be in
+   grayscale. In our context, we would typically want this to be true unless
+   we're debugging this method.
+ - wetime: A boolean representing if we want to time the function of grabbing
+   a frame. Typically only use this for debugging as well.
 """
-def grab_frame(debug = False, grayscale = True, wetime=False):
+def grab_frame(grayscale = True, wetime=False):
 	global window_rect
 	if window_rect == 0:
 		window_rect = get_window_rect()
 	now = 0
 	if wetime:
 		now = time.time()		
-	pixels = get_window_pixels_mss(window_rect, grayscale=True).convert("L")
+	pixels = None
+	if grayscale:
+		pixels = get_window_pixels_mss(window_rect, grayscale).convert("L")
+	else:
+		pixels = get_window_pixels_mss(window_rect, grayscale)
 	if debug:
 		if wetime:
 			now = time.time()
@@ -115,16 +139,5 @@ def grab_frame(debug = False, grayscale = True, wetime=False):
 			print("Showing frame. Took time:", time.time()-now)
 	if wetime:
 		print("Grabbing frame. Took time:", time.time()-now)
-	return pixels
+	return np.array(pixels)
 
-def get_window_pixels_mss(rect, grayscale=True):
-	from mss import mss
-	with mss() as sct:
-		bound = { 	"top": rect[1],
-					"left": rect[0],
-					"width": rect[2] - rect[0],
-					"height": rect[3] - rect[1],
-					"mon": len(sct.monitors) - 1
-		}
-		sct_img = sct.grab(bound)
-		return Image.frombytes('RGB', sct_img.size, sct_img.bgra, 'raw', 'BGRX')
