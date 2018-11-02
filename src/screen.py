@@ -34,7 +34,7 @@ Inputs:
 Returns an array representing the grayscale pixels of the screen given the
 rectangle of shape (l, w).
 """
-def get_window_pixels(rect, grayscale = True):
+def get_window_pixels(rect, grayscale=True):
 	if not grayscale:
 		return ImageGrab.grab(bbox=tuple(rect))
 	else:
@@ -69,7 +69,7 @@ Inputs:
 
 Returns a list of process names that we could possible want.
 """
-def _get_windows_by_title(title_text, exact = False):
+def _get_windows_by_title(title_text, exact=False):
 	def _window_callback(hwnd, all_windows):
 		all_windows.append((hwnd, win32gui.GetWindowText(hwnd)))
 	windows = []
