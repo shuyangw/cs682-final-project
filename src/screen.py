@@ -119,7 +119,7 @@ Inputs:
  - wetime: A boolean representing if we want to time the function of grabbing
    a frame. Typically only use this for debugging as well.
 """
-def grab_frame(grayscale = True, wetime=False):
+def grab_frame(grayscale=True, wetime=False):
 	global window_rect
 	if window_rect == 0:
 		window_rect = get_window_rect()
@@ -139,5 +139,6 @@ def grab_frame(grayscale = True, wetime=False):
 			print("Showing frame. Took time:", time.time()-now)
 	if wetime:
 		print("Grabbing frame. Took time:", time.time()-now)
-	return np.array(pixels)
 
+	#Return normalized frame
+	return np.array(pixels) / 255.
