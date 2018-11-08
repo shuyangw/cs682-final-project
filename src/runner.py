@@ -21,8 +21,10 @@ class Runner(object):
 
         iteration = 0
         while time.time() - timer < duration:
+            #CRUCIAL
             iteration += 1
+            GR.update_frames()
 
-            GR.update()
+
             if iteration % 15 == 0:
-                GR.save_queue()
+                print(GR.isdead())

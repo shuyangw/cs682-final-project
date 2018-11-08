@@ -18,12 +18,15 @@ class GameReader(object):
     Inputs:
      - fps: An integer represeting how many frames we would like to read per 
        second.
-     - max_frame_storage: An integer represeting how many frames we will be
+     - max_queue_size: An integer represeting how many frames we will be
        holding in memory.
     """
-    def __init__(self, fps, max_frame_storage):
+    def __init__(self, fps, max_queue_size):
         self.fps = fps
-        self.frame_queue = queue.Queue(maxsize=max_frame_storage)
+        self.max_queue_size = max_queue_size
+        self.frame_queue = queue.Queue(maxsize=max_queue_size)
+        self.frame_shape = None
+        self.is_dead = False
 
         #To debug frames
         self.imsave_img_count = 0
@@ -37,9 +40,11 @@ class GameReader(object):
 
     Returns the oldest frame in the queue.
     """
-    def update(self):
+    def update_frames(self):
         popped_frame = None
         frame = grab_frame()
+        if self.frame_shape == None:
+            self.frame_shape = frame.shape
         if self.frame_queue.full():
             popped_frame = self.frame_queue.get()
             self.frame_queue.put(frame)
@@ -48,8 +53,29 @@ class GameReader(object):
         return popped_frame
 
     def avg_luminosity(self):
-        return np.sum(np.array(list(self.frame_queue.queue))) / 255.
+        frame_length = float(len(self.frame_queue))
+        return np.sum(np.array(list(self.frame_queue.queue))) / frame_length
 
+    def isdead(self):
+        if self.frame_shape == None:
+            return True
+        prev_frame_val = np.inf
+        flag_count = 0
+        for img in list(self.frame_queue.queue):
+            #Sum up every pixel value
+            W, H = self.frame_shape
+            frame_val = float(np.sum(img)) / (W * H)
+            print(frame_val)
+
+            """
+            For some reason, the screen that appears when the player loses, 
+            appears to be perfect black to the naked eye, but is in actuality,
+            no where near. The screen has a grayscale value of about 13 out of
+            a maximum 255.
+            """
+            if frame_val < 0.06:
+                return True
+        return False
     """
     Analyzes the queue of frames and returns the state of the game.
     
