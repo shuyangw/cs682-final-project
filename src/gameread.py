@@ -6,7 +6,6 @@ from scipy.misc import imsave
 from screen import grab_frame
 
 
-
 class GameReader(object):
     """
     The GameReader object parses 15 frames at a time and returns the game state
@@ -52,10 +51,18 @@ class GameReader(object):
             self.frame_queue.put(frame)
         return popped_frame
 
+    """
+    Returns the average grayscale value from every pixel curerntly stored in the
+    frame queue.
+    """
     def avg_luminosity(self):
         frame_length = float(len(self.frame_queue))
         return np.sum(np.array(list(self.frame_queue.queue))) / frame_length
 
+    """
+    Returns whether or not the player is dead, indicating the restarting of a
+    new trial.
+    """
     def isdead(self):
         if self.frame_shape == None:
             return True

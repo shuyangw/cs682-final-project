@@ -26,7 +26,7 @@ class DDQN(object):
         
         # Ccalculate A(s,a)
         self.advantage_fc = tf.layers.dense(inputs = self.flatten,
-                    units = 512,
+                    units = 512,    
                     activation = tf.nn.elu,
                     kernel_initializer=tf.contrib.layers.xavier_initializer(),
                     name="advantage_fc")
@@ -39,7 +39,8 @@ class DDQN(object):
         
         # Agregating layer
         # Q(s,a) = V(s) + (A(s,a) - 1/|A| * sum A(s,a'))
-        self.output = self.value + tf.subtract(self.advantage, tf.reduce_mean(self.advantage, axis=1, keepdims=True))
+        self.output = self.value + tf.subtract(self.advantage, 
+            tf.reduce_mean(self.advantage, axis=1, keepdims=True))
             
         # Q is our predicted Q value.
         self.Q = tf.reduce_sum(tf.multiply(self.output, self.actions_), axis=1)
@@ -47,6 +48,8 @@ class DDQN(object):
         # The loss is modified because of PER 
         self.absolute_errors = tf.abs(self.target_Q - self.Q)# for updating Sumtree
         
-        self.loss = tf.reduce_mean(self.ISWeights_ * tf.squared_difference(self.target_Q, self.Q))
+        self.loss = tf.reduce_mean(
+            self.ISWeights_ * tf.squared_difference(self.target_Q, self.Q))
         
-        self.optimizer = tf.train.RMSPropOptimizer(self.learning_rate).minimize(self.loss)
+        self.optimizer = tf.train.RMSPropOptimizer(
+            self.learning_rate).minimize(self.loss)
