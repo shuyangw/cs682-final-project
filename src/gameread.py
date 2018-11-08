@@ -1,7 +1,11 @@
 import numpy as np
 import queue
 
+from scipy.misc import imsave
+
 from screen import grab_frame
+
+
 
 class GameReader(object):
     """
@@ -21,6 +25,11 @@ class GameReader(object):
         self.fps = fps
         self.frame_queue = queue.Queue(maxsize=max_frame_storage)
 
+        #To debug frames
+        self.imsave_img_count = 0
+        self.imsave_queue_count = 0
+        self.save_dir = "../debug_frames/"
+
     """
     Grabs the next frame in the game and updates the frame queue. The frame
     queue must not have more than 20 frames. If it is full, we discard the 
@@ -28,16 +37,18 @@ class GameReader(object):
 
     Returns the oldest frame in the queue.
     """
-    def update_frame_queue(self):
+    def update(self):
         popped_frame = None
-        if not self.frame_queue.empty():
-            frame = grab_frame()
-            if self.frame_queue.full():
-                popped_frame = self.frame_queue.get()
-                self.frame_queue.put(frame)
-            else:
-                self.frame_queue.put(frame)
-        return return_item
+        frame = grab_frame()
+        if self.frame_queue.full():
+            popped_frame = self.frame_queue.get()
+            self.frame_queue.put(frame)
+        else:
+            self.frame_queue.put(frame)
+        return popped_frame
+
+    def avg_luminosity(self):
+        return np.sum(np.array(list(self.frame_queue.queue))) / 255.
 
     """
     Analyzes the queue of frames and returns the state of the game.
@@ -51,6 +62,19 @@ class GameReader(object):
        playing again. 
      - transition: The game is now in a transitional phase and we must wait 
        until it is not to begin acting again.
+       # NOTE: Might not need this
     """
-    def parse_frame(self):
+    def parse(self):
         pass
+
+    def save_queue(self):
+        for img in list(self.frame_queue.queue):
+            img_name = ("queue" + str(self.imsave_queue_count) + "img" +
+                str(self.imsave_img_count) + ".png")
+            
+            mod_dir = self.save_dir + img_name
+            print("Saving" + img_name)
+            imsave(mod_dir, img)
+
+            self.imsave_img_count += 1
+        self.imsave_queue_count += 1

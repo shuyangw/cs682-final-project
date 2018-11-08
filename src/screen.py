@@ -119,7 +119,7 @@ Inputs:
  - wetime: A boolean representing if we want to time the function of grabbing
    a frame. Typically only use this for debugging as well.
 """
-def grab_frame(grayscale=True, wetime=False):
+def grab_frame(grayscale=True, wetime=False, debug=False):
 	global window_rect
 	if window_rect == 0:
 		window_rect = get_window_rect()
@@ -128,7 +128,7 @@ def grab_frame(grayscale=True, wetime=False):
 		now = time.time()		
 	pixels = None
 	if grayscale:
-		pixels = get_window_pixels_mss(window_rect, grayscale).convert("L")
+		pixels = get_window_pixels_mss(window_rect).convert("L")
 	else:
 		pixels = get_window_pixels_mss(window_rect, grayscale)
 	if debug:
