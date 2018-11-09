@@ -5,7 +5,6 @@ from scipy.misc import imsave
 
 from screen import grab_frame
 
-
 class GameReader(object):
     """
     The GameReader object parses 15 frames at a time and returns the game state

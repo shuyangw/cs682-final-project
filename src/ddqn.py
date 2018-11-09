@@ -46,7 +46,7 @@ class DDQN(object):
         self.Q = tf.reduce_sum(tf.multiply(self.output, self.actions_), axis=1)
         
         # The loss is modified because of PER 
-        self.absolute_errors = tf.abs(self.target_Q - self.Q)# for updating Sumtree
+        self.absolute_errors = tf.abs(self.target_Q - self.Q)
         
         self.loss = tf.reduce_mean(
             self.ISWeights_ * tf.squared_difference(self.target_Q, self.Q))

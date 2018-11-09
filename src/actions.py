@@ -33,6 +33,8 @@ class GameActions(object):
         action = self.actions[action_name]
         action()
 
+        return action_name
+
     """
     Corresponds to the action that shifts the player left.
     Conforms to the right arrowkey.

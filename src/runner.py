@@ -30,8 +30,3 @@ class Runner(object):
             #CRUCIAL
             iteration += 1
             GR.update_frames()
-
-            # if iteration % 15 == 0:
-            #     print(GR.isdead())
-
-            GA.random_action()   
