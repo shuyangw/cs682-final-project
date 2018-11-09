@@ -1,4 +1,5 @@
 from gameread import GameReader
+from actions import GameActions
 
 import time 
 
@@ -20,14 +21,17 @@ class Runner(object):
        run in seconds.
     """
     def run(self, duration=60):
-        print("Runner running")
+        print("Runner running") 
         timer = time.time()
         GR = GameReader(self.fps, 15)
+        GA = GameActions()
         iteration = 0
         while time.time() - timer < duration:
             #CRUCIAL
             iteration += 1
             GR.update_frames()
 
-            if iteration % 15 == 0:
-                print(GR.isdead())
+            # if iteration % 15 == 0:
+            #     print(GR.isdead())
+
+            GA.random_action()   

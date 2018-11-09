@@ -1,4 +1,5 @@
 import pyautogui
+import numpy as np
 
 class GameActions(object):
     """
@@ -10,50 +11,107 @@ class GameActions(object):
         self.actions = {
             "left": self.move_left,
             "right": self.move_right,
+            "air": self.air,
             "sleft": self.slide_left,
             "sright": self.slide_right,
             "stomp": self.stomp,
             "stompa": self.stomp_air,
-            "ground": self.ground,
             "pass": self.nothing
         }
         self.arrow_key_down = False
+        self.which_key_down = None
         self.space_down = False
+
+    """
+    Performs an action at random.
+    """
+    def random_action(self, verbose=False):
+        action_index = np.random.randint(0, len(self.actions))
+        action_name = list(self.actions)[action_index]
+        if verbose:
+            print("Performing action:", action_name)
+        action = self.actions[action_name]
+        action()
 
     """
     Corresponds to the action that shifts the player left.
     Conforms to the right arrowkey.
     """
     def move_right(self):
-        pass
+        if not self.arrow_key_down:
+            pyautogui.keyDown('right')
+            self.arrow_key_down = True
+            self.which_key_down = 'right'
+        else:
+            if self.which_key_down == 'right':
+                pyautogui.keyUp('right')
+                self.which_key_down = None
+                self.arrow_key_down = False
+            else:
+                pyautogui.keyUp(self.which_key_down)
+                pyautogui.keyDown('right')
+                self.which_key_down = 'right'
 
     """
     Corresponds to the action that shifts the player left.
     Conforms to the left arrowkey.
     """
     def move_left(self):
-        pass
+        if not self.arrow_key_down:
+            pyautogui.keyDown('left')
+            self.arrow_key_down = True
+            self.which_key_down = 'left'
+        else:
+            if self.which_key_down == 'left':
+                pyautogui.keyUp('left')
+                self.which_key_down = None
+                self.arrow_key_down = False
+            else:
+                pyautogui.keyUp(self.which_key_down)
+                pyautogui.keyDown('left')
+                self.which_key_down = 'left'
     
+    def air(self):
+        if not self.arrow_key_down:
+            pyautogui.keyDown('up')
+            self.arrow_key_down = True
+            self.which_key_down = 'up'
+        else:
+            if self.which_key_down == 'up':
+                pyautogui.keyUp('up')
+                self.which_key_down = None
+                self.arrow_key_down = False
+            else:
+                pyautogui.keyUp(self.which_key_down)
+                pyautogui.keyDown('up')
+                self.which_key_down = 'up'
+
     """
     Corresponds to the action that slides the player left.
     Conforms to combination: left + spacebar
     """
     def slide_left(self):
-        pass
-
+        self.move_left()
+        self.stomp()
     """
     Corresponds to the action that slides the player left.
     Conforms to combination: right + spacebar
     """
     def slide_right(self):
-        pass
+        self.move_right()
+        self.stomp()
 
     """
     Corresponds to the action that performs the stomp action.
     Conforms to the spacebar.
     """
     def stomp(self):
-        pass
+        if not self.space_down:
+            pyautogui.keyDown('space')
+            self.space_down = True
+        else:
+            pyautogui.keyDown('space')
+            self.space_down = False
 
     """
     Corresponds to the action that performs the stomp when the player is
@@ -61,10 +119,13 @@ class GameActions(object):
     Conforms to combination: down + spacebar
     """
     def stomp_air(self):
-        pass
+        self.stomp()
+        self.air()
 
     """
-    Does nothing to the game.
+    Clears every ongoing action.
     """
     def nothing(self):
-        pass
+        pyautogui.keyUp('space')
+        if self.which_key_down != None:
+            pyautogui.keyUp(self.which_key_down)
